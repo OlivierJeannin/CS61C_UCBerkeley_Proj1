@@ -8,6 +8,7 @@
 #include "snake_utils.h"
 
 /* Helper function definitions */
+static void *malloc_n_check(size_t size);
 static void set_board_at(game_t *game, unsigned int row, unsigned int col, char ch);
 static bool is_tail(char c);
 static bool is_head(char c);
@@ -23,13 +24,65 @@ static void update_head(game_t *game, unsigned int snum);
 
 /* Task 1 */
 game_t *create_default_game() {
-  // TODO: Implement this function.
-  return NULL;
+  // primary data of the default game
+  unsigned int board_num_rows = 18;
+  char *board_edge_row   = "####################\n";
+  char *board_middle_row = "#                  #\n";
+  char *board_snake_row  = "# d>D    *         #\n";
+
+  // game_t struct
+  game_t *default_game = (game_t *) malloc_n_check(sizeof(game_t));
+  default_game->num_rows = board_num_rows;
+
+  // board
+  default_game->board = (char **) malloc_n_check(board_num_rows * sizeof(char *));
+  size_t board_row_len = strlen(board_edge_row);
+  for (unsigned int i = 0; i < board_num_rows; i++) {
+    default_game->board[i] = (char *) malloc_n_check((board_row_len + 1) * sizeof(char));
+  }
+
+  // fill in board strings
+  strcpy(default_game->board[0], board_edge_row);
+  for (unsigned int i = 1; i < board_num_rows - 1; i++) {
+    strcpy(default_game->board[i], board_middle_row);
+  }
+  strcpy(default_game->board[2], board_snake_row);
+  strcpy(default_game->board[board_num_rows-1], board_edge_row);
+
+  default_game->num_snakes = 1;
+
+  // snakes array
+  default_game->snakes = (snake_t *) malloc_n_check(sizeof(snake_t));
+  default_game->snakes[0] = (snake_t) {
+    .tail_row = 2, .tail_col = 2,
+    .head_row = 2, .head_col = 4,
+    .live = true
+  };
+
+  return default_game;
+}
+
+/*
+ * Mallocs size bytes of heap memory, and check if it succeeded.
+ * If malloc returned with a null pointer, the program is crashed.
+ */
+static void *malloc_n_check(size_t size) {
+  void *ptr = malloc(size);
+  if (ptr == NULL) {
+    printf("malloc() failed.\n");
+    exit(1);
+  }
+  return ptr;
 }
 
 /* Task 2 */
 void free_game(game_t *game) {
-  // TODO: Implement this function.
+  for (unsigned int i = 0; i < game->num_rows; i++) {
+    free(game->board[i]);
+  }
+  free(game->board);
+  free(game->snakes);
+  free(game);
   return;
 }
 
