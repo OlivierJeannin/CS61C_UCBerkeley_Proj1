@@ -97,37 +97,181 @@ bool test_is_vowel() {
 /* Task 4.1 */
 
 bool test_is_tail() {
-  // TODO: Implement this function.
+  char msg[11];
+  for (int i = 0; i < 128; i++) {
+    sprintf(msg, "output_%d", i);
+    char testcase = (char) i;
+    bool output = is_tail(testcase);
+    if (testcase == 'w' || testcase == 'a'
+        || testcase == 's' || testcase == 'd') {
+      if (!assert_true(msg, output)) {
+        return false;
+      }
+    }
+    else {
+      if (!assert_false(msg, output)) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 
 bool test_is_head() {
-  // TODO: Implement this function.
+  char msg[11];
+  for (int i = 0; i < 128; i++) {
+    sprintf(msg, "output_%d", i);
+    char testcase = (char) i;
+    bool output = is_head(testcase);
+    if (testcase == 'W' || testcase == 'A'
+        || testcase == 'S' || testcase == 'D'
+        || testcase == 'x') {
+      if (!assert_true(msg, output)) {
+        return false;
+      }
+    }
+    else {
+      if (!assert_false(msg, output)) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 
 bool test_is_snake() {
-  // TODO: Implement this function.
+  char msg[11];
+  for (int i = 0; i < 128; i++) {
+    sprintf(msg, "output_%d", i);
+    char testcase = (char) i;
+    bool output = is_snake(testcase);
+    if (testcase == 'w' || testcase == 'a' || testcase == 's' || testcase == 'd'
+        || testcase == '^' || testcase == '<' || testcase == 'v' || testcase == '>'
+        || testcase == 'W' || testcase == 'A' || testcase == 'S' || testcase == 'D' || testcase == 'x') {
+      if (!assert_true(msg, output)) {
+        return false;
+      }
+    }
+    else {
+      if (!assert_false(msg, output)) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 
 bool test_body_to_tail() {
-  // TODO: Implement this function.
+  char testcase_1 = '^';
+  char output_1 = body_to_tail(testcase_1);
+  if (!assert_equals_char("testcase_1", 'w', output_1)) {
+    return false;
+  }
+
+  char testcase_2 = '<';
+  char output_2 = body_to_tail(testcase_2);
+  if (!assert_equals_char("testcase_2", 'a', output_2)) {
+    return false;
+  }
+
+  char testcase_3 = 'v';
+  char output_3 = body_to_tail(testcase_3);
+  if (!assert_equals_char("testcase_3", 's', output_3)) {
+    return false;
+  }
+
+  char testcase_4 = '>';
+  char output_4 = body_to_tail(testcase_4);
+  if (!assert_equals_char("testcase_4", 'd', output_4)) {
+    return false;
+  }
+
   return true;
 }
 
 bool test_head_to_body() {
-  // TODO: Implement this function.
+  char testcase_1 = 'W';
+  char output_1 = head_to_body(testcase_1);
+  if (!assert_equals_char("testcase_1", '^', output_1)) {
+    return false;
+  }
+
+  char testcase_2 = 'A';
+  char output_2 = head_to_body(testcase_2);
+  if (!assert_equals_char("testcase_2", '<', output_2)) {
+    return false;
+  }
+
+  char testcase_3 = 'S';
+  char output_3 = head_to_body(testcase_3);
+  if (!assert_equals_char("testcase_3", 'v', output_3)) {
+    return false;
+  }
+
+  char testcase_4 = 'D';
+  char output_4 = head_to_body(testcase_4);
+  if (!assert_equals_char("testcase_4", '>', output_4)) {
+    return false;
+  }
+
   return true;
 }
 
 bool test_get_next_row() {
-  // TODO: Implement this function.
+  char msg[19];
+
+  for (unsigned int testcase_cur_row = 0; testcase_cur_row < 100; testcase_cur_row++) {
+    for (int i = 0; i < 128; i++) {
+      char testcase_c = (char) i;
+      sprintf(msg, "(%u, %d)", testcase_cur_row, testcase_c);
+      unsigned int output = get_next_row(testcase_cur_row, testcase_c);
+      if (testcase_c == 'v' || testcase_c == 's' || testcase_c == 'S') {
+        if (!assert_equals_unsigned_int(msg, testcase_cur_row + 1, output)) {
+          return false;
+        }
+      }
+      else if (testcase_c == '^' || testcase_c == 'w' || testcase_c == 'W') {
+        if (!assert_equals_unsigned_int(msg, testcase_cur_row - 1, output)) {
+          return false;
+        }
+      }
+      else {
+        if (!assert_equals_unsigned_int(msg, testcase_cur_row, output)) {
+          return false;
+        }
+      }
+    }
+  }
+
   return true;
 }
 
 bool test_get_next_col() {
-  // TODO: Implement this function.
+  char msg[19];
+
+  for (unsigned int testcase_cur_col = 0; testcase_cur_col < 100; testcase_cur_col++) {
+    for (int i = 0; i < 128; i++) {
+      char testcase_c = (char) i;
+      sprintf(msg, "(%u, %d)", testcase_cur_col, testcase_c);
+      unsigned int output = get_next_col(testcase_cur_col, testcase_c);
+      if (testcase_c == '>' || testcase_c == 'd' || testcase_c == 'D') {
+        if (!assert_equals_unsigned_int(msg, testcase_cur_col + 1, output)) {
+          return false;
+        }
+      }
+      else if (testcase_c == '<' || testcase_c == 'a' || testcase_c == 'A') {
+        if (!assert_equals_unsigned_int(msg, testcase_cur_col - 1, output)) {
+          return false;
+        }
+      }
+      else {
+        if (!assert_equals_unsigned_int(msg, testcase_cur_col, output)) {
+          return false;
+        }
+      }
+    }
+  }
+
   return true;
 }
 
