@@ -241,8 +241,15 @@ static unsigned int get_next_col(unsigned int cur_col, char c) {
   This function should not modify anything.
 */
 static char next_square(game_t *game, unsigned int snum) {
-  // TODO: Implement this function.
-  return '?';
+  unsigned int head_row = game->snakes[snum].head_row;
+  unsigned int head_col = game->snakes[snum].head_col;
+
+  char head = get_board_at(game, head_row, head_col);
+
+  unsigned int next_head_row = get_next_row(head_row, head);
+  unsigned int next_head_col = get_next_col(head_col, head);
+
+  return get_board_at(game, next_head_row, next_head_col);
 }
 
 /*
