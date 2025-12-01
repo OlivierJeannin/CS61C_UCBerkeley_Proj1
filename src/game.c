@@ -306,7 +306,8 @@ static void update_tail(game_t *game, unsigned int snum) {
 
   // on the board
   set_board_at(game, old_tail_row, old_tail_col, ' ');
-  set_board_at(game, new_tail_row, new_tail_col, body_to_tail(get_board_at(game, new_tail_row, new_tail_col)));
+  char body = get_board_at(game, new_tail_row, new_tail_col);
+  set_board_at(game, new_tail_row, new_tail_col, body_to_tail(body));
 
   // in the snake struct
   game->snakes[snum].tail_row = new_tail_row;
@@ -317,7 +318,30 @@ static void update_tail(game_t *game, unsigned int snum) {
 
 /* Task 4.5 */
 void update_game(game_t *game, int (*add_food)(game_t *game)) {
-  // TODO: Implement this function.
+  // update for each snake
+  for (unsigned int i = 0; i < game->num_snakes; i++) {
+    char ns = next_square(game, i);
+    if (ns == ' ') {
+      // take one step forward
+      update_head(game, i);
+      update_tail(game, i);
+    }
+    else if (is_snake(ns) || ns == '#') {
+      // die
+      snake_t *snake = game->snakes + i;
+      snake->live = false;
+      set_board_at(game, snake->head_row, snake->head_col, 'x');
+    }
+    else if (ns == '*') {
+      // eat fruit
+      update_head(game, i);
+      add_food(game);
+    }
+    else {
+      printf("Invalid character on the board. Can't happen.\n");
+      exit(1);
+    }
+  }
   return;
 }
 
