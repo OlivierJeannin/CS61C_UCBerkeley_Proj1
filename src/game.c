@@ -264,7 +264,7 @@ static char next_square(game_t *game, unsigned int snum) {
   Note that this function ignores food, walls, and snake bodies when moving the head.
 */
 static void update_head(game_t *game, unsigned int snum) {
-  // compute location of new head
+  // compute the location of new head
   unsigned int old_head_row = game->snakes[snum].head_row;
   unsigned int old_head_col = game->snakes[snum].head_col;
 
@@ -295,7 +295,23 @@ static void update_head(game_t *game, unsigned int snum) {
   ...in the snake struct: update the row and col of the tail
 */
 static void update_tail(game_t *game, unsigned int snum) {
-  // TODO: Implement this function.
+  // compute the location of new tail
+  unsigned int old_tail_row = game->snakes[snum].tail_row;
+  unsigned int old_tail_col = game->snakes[snum].tail_col;
+
+  char old_tail = get_board_at(game, old_tail_row, old_tail_col);
+
+  unsigned int new_tail_row = get_next_row(old_tail_row, old_tail);
+  unsigned int new_tail_col = get_next_col(old_tail_col, old_tail);
+
+  // on the board
+  set_board_at(game, old_tail_row, old_tail_col, ' ');
+  set_board_at(game, new_tail_row, new_tail_col, body_to_tail(get_board_at(game, new_tail_row, new_tail_col)));
+
+  // in the snake struct
+  game->snakes[snum].tail_row = new_tail_row;
+  game->snakes[snum].tail_col = new_tail_col;
+
   return;
 }
 
