@@ -63,8 +63,9 @@ game_t *create_default_game() {
 }
 
 /*
- * Mallocs size bytes of heap memory, and check if it succeeded.
- * If malloc returned with a null pointer, the program is crashed.
+ * This is my newly added helper function for error checking when malloc() is called.
+ * Mallocs 'size' bytes of heap memory, and check if the call succeeded.
+ * If malloc() returned with a null pointer, the program is crashed.
  */
 static void *malloc_n_check(size_t size) {
   void *ptr = malloc(size);
@@ -347,8 +348,34 @@ void update_game(game_t *game, int (*add_food)(game_t *game)) {
 
 /* Task 5.1 */
 char *read_line(FILE *fp) {
-  // TODO: Implement this function.
-  return NULL;
+  size_t buf_size = 10;
+  char *buf = (char *) malloc_n_check(buf_size * sizeof(char));
+
+  // base case 1: error or empty line
+  if (fgets(buf, (int) buf_size, fp) == NULL) {
+    return NULL;
+  }
+
+  // base case 2: line is short
+  if (strchr(buf, '\n') != NULL) {
+    buf = (char *) realloc(buf, strlen(buf) + 1);
+    if (buf == NULL) {
+      printf("realloc() failed.\n");
+      exit(1);
+    }
+    return buf;
+  }
+
+  // recursive case: line is very long
+  char *remainder = read_line(fp);
+  buf = (char *) realloc(buf, strlen(buf) + strlen(remainder) + 1);
+  if (buf == NULL) {
+    printf("realloc() failed.\n");
+    exit(1);
+  }
+  buf = strcat(buf, remainder);
+  free(remainder);
+  return buf;
 }
 
 /* Task 5.2 */
