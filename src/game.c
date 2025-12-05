@@ -8,7 +8,6 @@
 #include "snake_utils.h"
 
 /* Helper function definitions */
-static void *malloc_n_check(size_t size);
 static void set_board_at(game_t *game, unsigned int row, unsigned int col, char ch);
 static bool is_tail(char c);
 static bool is_head(char c);
@@ -26,33 +25,40 @@ static void update_head(game_t *game, unsigned int snum);
 game_t *create_default_game() {
   // primary data of the default game
   unsigned int board_num_rows = 18;
+  unsigned int board_num_cols = 20;
   char *board_edge_row   = "####################\n";
   char *board_middle_row = "#                  #\n";
   char *board_snake_row  = "# d>D    *         #\n";
 
   // game_t struct
-  game_t *default_game = (game_t *) malloc_n_check(sizeof(game_t));
-  default_game->num_rows = board_num_rows;
+  game_t *default_game = (game_t *) malloc(sizeof(game_t));
+  if (default_game == NULL) exit(1);
 
   // board
-  default_game->board = (char **) malloc_n_check(board_num_rows * sizeof(char *));
-  size_t board_row_len = strlen(board_edge_row);
+  default_game->num_rows = board_num_rows;
+  default_game->board = (char **) malloc(board_num_rows * sizeof(char *));
+  if (default_game->board == NULL) exit(1);
+
+  // allocate memory for board
   for (unsigned int i = 0; i < board_num_rows; i++) {
-    default_game->board[i] = (char *) malloc_n_check((board_row_len + 1) * sizeof(char));
+    default_game->board[i] = (char *) malloc((board_num_cols + 2) * sizeof(char));
+    if (default_game->board[i] == NULL) exit(1);
   }
 
   // fill in board strings
   strcpy(default_game->board[0], board_edge_row);
-  for (unsigned int i = 1; i < board_num_rows - 1; i++) {
+  strcpy(default_game->board[1], board_middle_row);
+  strcpy(default_game->board[2], board_snake_row);
+  for (unsigned int i = 3; i <= board_num_rows - 2; i++) {
     strcpy(default_game->board[i], board_middle_row);
   }
-  strcpy(default_game->board[2], board_snake_row);
   strcpy(default_game->board[board_num_rows-1], board_edge_row);
 
   default_game->num_snakes = 1;
 
-  // snakes array
-  default_game->snakes = (snake_t *) malloc_n_check(sizeof(snake_t));
+  // snakes
+  default_game->snakes = (snake_t *) malloc(sizeof(snake_t));
+  if (default_game->snakes == NULL) exit(1);
   default_game->snakes[0] = (snake_t) {
     .tail_row = 2, .tail_col = 2,
     .head_row = 2, .head_col = 4,
@@ -60,20 +66,6 @@ game_t *create_default_game() {
   };
 
   return default_game;
-}
-
-/*
- * This is my newly added helper function for error checking when malloc() is called.
- * Mallocs 'size' bytes of heap memory, and check if the call succeeded.
- * If malloc() returned with a null pointer, the program is crashed.
- */
-static void *malloc_n_check(size_t size) {
-  void *ptr = malloc(size);
-  if (ptr == NULL) {
-    printf("malloc() failed.\n");
-    exit(1);
-  }
-  return ptr;
 }
 
 /* Task 2 */
@@ -349,30 +341,31 @@ void update_game(game_t *game, int (*add_food)(game_t *game)) {
 /* Task 5.1 */
 char *read_line(FILE *fp) {
   size_t buf_size = 10;
-  char *buf = (char *) malloc_n_check(buf_size * sizeof(char));
+  char *buf = (char *) malloc(buf_size * sizeof(char));
+  if (buf == NULL) exit(1);
 
   // base case 1: error or empty line
   if (fgets(buf, (int) buf_size, fp) == NULL) {
+    free(buf);
     return NULL;
   }
 
   // base case 2: line is short
   if (strchr(buf, '\n') != NULL) {
     buf = (char *) realloc(buf, strlen(buf) + 1);
-    if (buf == NULL) {
-      printf("realloc() failed.\n");
-      exit(1);
-    }
+    if (buf == NULL) exit(1);
     return buf;
   }
 
   // recursive case: line is very long
   char *remainder = read_line(fp);
-  buf = (char *) realloc(buf, strlen(buf) + strlen(remainder) + 1);
-  if (buf == NULL) {
-    printf("realloc() failed.\n");
-    exit(1);
+  if (remainder == NULL) {
+    // error
+    free(buf);
+    return NULL;
   }
+  buf = (char *) realloc(buf, strlen(buf) + strlen(remainder) + 1);
+  if (buf == NULL) exit(1);
   buf = strcat(buf, remainder);
   free(remainder);
   return buf;
@@ -380,8 +373,44 @@ char *read_line(FILE *fp) {
 
 /* Task 5.2 */
 game_t *load_board(FILE *fp) {
-  // TODO: Implement this function.
-  return NULL;
+  unsigned int num_rows_read = 0;
+  char **board = (char **) malloc(sizeof(char *));
+  if (board == NULL) exit(1);
+  unsigned int board_capacity = 1;
+
+  // read line from file
+  char *line;
+  while ((line = read_line(fp)) != NULL) {
+    if (num_rows_read == board_capacity) {
+      // resize board
+      board_capacity *= 2;
+      board = (char **) realloc(board, board_capacity * sizeof(char *));
+      if (board == NULL) exit(1);
+    }
+    // add the line to board
+    board[num_rows_read] = line;
+    num_rows_read ++;
+  }
+
+  if (num_rows_read == 0) {  // empty file
+    free(board);
+    return NULL;
+  }
+
+  if (board_capacity > num_rows_read) {  // allocated too much memory
+    board = (char **) realloc(board, num_rows_read * sizeof(char *));
+    if (board == NULL) exit(1);
+  }
+
+  // fill in game struct
+  game_t *game = (game_t *) malloc(sizeof(game_t));
+  if (game == NULL) exit(1);
+  game->num_rows = num_rows_read;
+  game->board = board;
+  game->num_snakes = 0;
+  game->snakes = NULL;
+
+  return game;
 }
 
 /*
