@@ -422,7 +422,16 @@ game_t *load_board(FILE *fp) {
   fill in the head row and col in the struct.
 */
 static void find_head(game_t *game, unsigned int snum) {
-  // TODO: Implement this function.
+  unsigned int row = game->snakes[snum].tail_row;
+  unsigned int col = game->snakes[snum].tail_col;
+  while (1) {
+    char ch = get_board_at(game, row, col);
+    if (is_head(ch)) break;
+    row = get_next_row(row, ch);
+    col = get_next_col(col, ch);
+  }
+  game->snakes[snum].head_row = row;
+  game->snakes[snum].head_col = col;
   return;
 }
 
