@@ -437,6 +437,22 @@ static void find_head(game_t *game, unsigned int snum) {
 
 /* Task 6.2 */
 game_t *initialize_snakes(game_t *game) {
-  // TODO: Implement this function.
-  return NULL;
+  game->num_snakes = 0;
+  game->snakes = NULL;
+  for (unsigned int r = 0; r < game->num_rows; r++) {
+    for (unsigned int c = 0; c < strlen(game->board[r]); c++) {
+      if (is_tail(get_board_at(game, r, c))) {
+        game->snakes = realloc(game->snakes, (game->num_snakes + 1) * sizeof(snake_t));
+        if (game->snakes == NULL) exit(1);
+
+        game->snakes[game->num_snakes].live = true;
+        game->snakes[game->num_snakes].tail_row = r;
+        game->snakes[game->num_snakes].tail_col = c;
+        find_head(game, game->num_snakes);
+
+        game->num_snakes ++;
+      }
+    }
+  }
+  return game;
 }
